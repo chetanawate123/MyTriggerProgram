@@ -1,0 +1,29 @@
+trigger NoOfEventsTrigger on Event (before insert) {
+    If (Trigger.IsInsert){
+        Integer MonthNumber = Date.Today().Month();
+        Integer YearNumber = Date.Today().Year();
+        
+        Event__mdt metadataRecord =[select Id ,NoOfEvents__c from Event__mdt];
+        Integer MaxEvents =Integer.valueOf(metadataRecord.MaxEvents__c);
+        Id Xuser =UserInfo.Getuserid();
+        
+        User Usr = [select name from user where id=:userinfo.getuserid()];
+        if(metadataRecord.NoOfEvents__c>MaxEvents){
+            Trigger.New[0].addError('Too many Events created this month for user '+Usr.Name+' ' +Xuser+' : '+MaxEvents);
+        }
+        
+        List<User> userList = [SELECT Id FROM User];
+        for(User l: userList){
+            List<Event> LstEvents = [select id,CreatedById,CreatedDate from Event where CALENDAR_YEAR(CreatedDate) =:YearNumber and CALENDAR_MONTH(CreatedDate)=:monthnumber and CreatedById=:l.Id];
+            
+            Map<Id,List<Event>> listUser=new Map<Id,List<Event>>();
+            listUser.put(Xuser, LstEvents);
+            
+            If (listUser.get(Xuser).Size()>MaxEvents)      
+            {
+                Trigger.New[0].addError('Too many Events created this month for user '+Usr.Name+' ' +Xuser+' : 4');
+            }
+        }
+    }
+    
+}
