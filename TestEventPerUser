@@ -20,4 +20,24 @@ public class TestEventPerUser {
         
     }
     
+    @isTest public static void moreThenMaxEvents(){
+        Test.startTest();
+         Event__mdt metadataRecord =[select Id ,MaxEvents__c from Event__mdt];
+        List<Event> listEvent=null;
+        for(Integer i=0;i<110;i++){
+            Event e=new Event();
+            e.ActivityDate=Date.today();
+            e.Subject='meeting'+i;
+            listEvent.add(e);
+        }
+        try{
+        insert listEvent;
+        }
+        catch(Exception e){
+           Test.stopTest(); 
+        }
+     // System.assertEquals(110, metadataRecord.MaxEvents__c);
+        
+    }
+    
 }
